@@ -2,6 +2,9 @@ package sini.grapher;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.util.ArrayList;
+import java.util.Random;
+import java.util.function.Function;
 
 import javax.swing.JPanel;
 
@@ -11,10 +14,14 @@ import sini.complex.ComplexMath;
 public class Display extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
 	private static final long serialVersionUID = -6696561578530033238L;
 	
+	public static final Random rand = new Random();
+	
 	private static final int DEFAULT_PADDING = 50;
 	
 	private PointDouble viewPoint; // Represents the top left coordinate of the viewport
 	private double zoom;
+	
+	ArrayList<Curve> curves;
 
 	public Display() {
 		zoom = 2;
@@ -23,6 +30,40 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		addMouseListener(this);
 		addMouseWheelListener(this);
 		addMouseMotionListener(this);
+		
+		// Define parametric functions
+		ArrayList<Function<double[], double[]>> parametricFunctions = new ArrayList<Function<double[], double[]>>();
+		parametricFunctions.add(
+				(double[] p) -> {
+					Complex c = new Complex(p[0], 0);
+					c = expi(expi(c));
+					return new double[] {c.real, c.imaginary};
+				});
+		
+		// Define simple functions
+		ArrayList<Function<Double, Double>> simpleFunctions = new ArrayList<Function<Double, Double>>();
+		simpleFunctions.add(x -> x*x*Math.sin(1/x));
+		simpleFunctions.add(x -> x*x);
+		
+		// Define parametric curves
+		ParametricCurve curve = new ParametricCurve(this, parametricFunctions.get(0));
+		curve.updateMesh(new Interval(0, 4), 0.01);
+		
+		// Add curves to the curve list
+		curves = new ArrayList<Curve>();
+		curves.add(curve);
+		
+		for(Function<Double, Double> f: simpleFunctions) {
+			curves.add(new SimpleFunctionCurve(this, f, new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat())));
+		}
+	}
+	
+	private void updateCurves() {
+		for(Curve curve: curves) {
+			if(curve instanceof SimpleFunctionCurve) {
+				curve.updateMesh(new Interval(getPlaneX(0), getPlaneX(getWidth())), 1.0 / (100 * zoom));
+			}
+		}
 	}
 	
 	/**
@@ -34,6 +75,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 				p.y + (double)getHeight() / (2 * DEFAULT_PADDING * zoom)
 				);
 		
+		updateCurves();
 		repaint();
 	}
 	
@@ -48,6 +90,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 				viewPoint.y + pointPlane.y - pointDisplayPlaneCoord.y
 				);
 		
+		updateCurves();
 		repaint();
 	}
 	
@@ -88,58 +131,71 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		
 		
 		// Draw graph
-		
-		g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-		
-		g2.setColor(new Color(60, 100, 255));
-		g2.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		
-		int fineness = 2048;
-		Polygon poly = new Polygon();
-		
-		for(int i = 0; i <= fineness; i++) {
-			double x = 4 * (double)i/(double)fineness + 1;
-			Complex c = expi(expi(new Complex(x,0)));
-			
-			PointDouble p = getPointFromComplex(c);
-			Point drawPoint = getDisplayCoord(p).getPoint();
-			
-			poly.addPoint(drawPoint.x, drawPoint.y);
-		}
-		
-		g2.drawPolygon(poly);
-		g2.setStroke(new BasicStroke(5, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-		
-		g2.setColor(Color.BLACK);
-		for(int i = 0; i < poly.npoints; i++) {
-			Point p = new Point(poly.xpoints[i], poly.ypoints[i]);
-			g2.drawLine(p.x, p.y, p.x, p.y);
+		for(Curve curve: curves) {
+			curve.draw(g2);
 		}
 	}
 	
-	private double getPlaneX(double x) {
+	
+	/**
+	 * Returns the x-coordinate on the plane that corresponds to the x-coordinate on the display given by {@code x}.
+	 * @param x the x-coordinate of a point on the display.
+	 * @return the x-coordinate on the plane that corresponds to the x-coordinate on the display given by {@code x}.
+	 */
+	public double getPlaneX(double x) {
 		return x / (zoom * DEFAULT_PADDING) + viewPoint.x;
 	}
 	
-	private double getPlaneY(double y) {
+	
+	/**
+	 * Returns the y-coordinate on the plane that corresponds to the y-coordinate on the display given by {@code y}.
+	 * @param y the y-coordinate of a point on the display.
+	 * @return the y-coordinate on the plane that corresponds to the y-coordinate on the display given by {@code y}.
+	 */
+	public double getPlaneY(double y) {
 		return -y / (zoom * DEFAULT_PADDING) + viewPoint.y;
 	}
 	
-	private double getDisplayX(double x) {
+	
+	/**
+	 * Returns the x-coordinate on the display that corresponds to the x-coordinate on the plane given by {@code x}.
+	 * @param x the x-coordinate of a point on the plane.
+	 * @return the x-coordinate on the display that corresponds to the x-coordinate on the plane given by {@code x}.
+	 */
+	public double getDisplayX(double x) {
 		return (int)((x - viewPoint.x) * zoom * DEFAULT_PADDING);
 	}
 	
-	private double getDisplayY(double y) {
+	
+	/**
+	 * Returns the y-coordinate on the display that corresponds to the y-coordinate on the plane given by {@code y}.
+	 * @param y the y-coordinate of a point on the plane.
+	 * @return the y-coordinate on the display that corresponds to the y-coordinate on the plane given by {@code y}.
+	 */
+	public double getDisplayY(double y) {
 		return (int)((-y + viewPoint.y) * zoom * DEFAULT_PADDING);
 	}
 	
-	private PointDouble getPlaneCoord(Point p) {
+	
+	/**
+	 * Returns the point on the plane that corresponds to the point on the display given by {@code p}.
+	 * @param p a point on the display.
+	 * @return the point on the plane that corresponds to the point on the display given by {@code p}.
+	 */
+	public PointDouble getPlaneCoord(Point p) {
 		return new PointDouble(getPlaneX(p.x), getPlaneY(p.y));
 	}
 	
-	private PointDouble getDisplayCoord(PointDouble p) {
+	
+	/**
+	 * Returns the point on the display that corresponds to the point on the plane given by {@code p}.
+	 * @param p a point on the plane.
+	 * @return the point on the display that corresponds to the point on the plane given by {@code p}.
+	 */
+	public PointDouble getDisplayCoord(PointDouble p) {
 		return new PointDouble(getDisplayX(p.x), getDisplayY(p.y));
 	}
+	
 	
 	private Complex expi(Complex c) {
 		return ComplexMath.exp(Complex.I.multiply(c.multiply(Math.PI / 2)));
