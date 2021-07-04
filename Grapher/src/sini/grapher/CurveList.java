@@ -18,11 +18,24 @@ public class CurveList {
 	public static ArrayList<Curve> getCurves() {
 		ArrayList<Curve> curves = new ArrayList<Curve>();
 		
-		curves.add(new ParametricCurve(p -> tetrationCardoid(p), new Interval(0, 4), 0.01));
-		curves.add(new SimpleFunctionCurve(x -> Math.sin(x), randomColor()));
-		curves.add(new SimpleFunctionCurve(x -> x*x, randomColor()));
+		//curves.add(new ParametricCurve(p -> tetrationCardoid(p), new Interval(0, 4), 0.01));
+		//curves.add(new SimpleFunctionCurve(x -> Math.sin(x), randomColor()));
+		//curves.add(new SimpleFunctionCurve(x -> x*x, randomColor()));
+		curves.add(new SimpleFunctionCurve(x -> funnyFractionFractal(x), randomColor()));
 		
 		return curves;
+	}
+
+	private static double funnyFractionFractal(double x) {
+		double result = Math.abs(x);
+		
+		int iterations = 300;
+		
+		for(int i = 1; i <= iterations; i++) {
+			result = Math.abs(result - (double)iterations / i);
+		}
+		
+		return result;
 	}
 
 	private static double[] tetrationCardoid(double[] p) {
