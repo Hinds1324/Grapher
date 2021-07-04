@@ -3,18 +3,11 @@ package sini.grapher;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
-import java.util.Random;
-import java.util.function.Function;
 
 import javax.swing.JPanel;
 
-import sini.complex.Complex;
-import sini.complex.ComplexMath;
-
 public class Display extends JPanel implements MouseWheelListener, MouseMotionListener, MouseListener {
 	private static final long serialVersionUID = -6696561578530033238L;
-	
-	public static final Random rand = new Random();
 	
 	private static final int DEFAULT_PADDING = 50;
 	
@@ -31,31 +24,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		addMouseWheelListener(this);
 		addMouseMotionListener(this);
 		
-		// Define parametric functions
-		ArrayList<Function<double[], double[]>> parametricFunctions = new ArrayList<Function<double[], double[]>>();
-		parametricFunctions.add(
-				(double[] p) -> {
-					Complex c = new Complex(p[0], 0);
-					c = expi(expi(c));
-					return new double[] {c.real, c.imaginary};
-				});
-		
-		// Define simple functions
-		ArrayList<Function<Double, Double>> simpleFunctions = new ArrayList<Function<Double, Double>>();
-		simpleFunctions.add(x -> x*x*Math.sin(1/x));
-		simpleFunctions.add(x -> x*x);
-		
-		// Define parametric curves
-		ParametricCurve curve = new ParametricCurve(this, parametricFunctions.get(0));
-		curve.updateMesh(new Interval(0, 4), 0.01);
-		
-		// Add curves to the curve list
-		curves = new ArrayList<Curve>();
-		curves.add(curve);
-		
-		for(Function<Double, Double> f: simpleFunctions) {
-			curves.add(new SimpleFunctionCurve(this, f, new Color(rand.nextFloat(), rand.nextFloat(), rand.nextFloat())));
-		}
+		curves = CurveList.getCurves();
 	}
 	
 	private void updateCurves() {
@@ -132,7 +101,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		
 		// Draw graph
 		for(Curve curve: curves) {
-			curve.draw(g2);
+			curve.draw(this, g2);
 		}
 	}
 	
@@ -194,15 +163,6 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 	 */
 	public PointDouble getDisplayCoord(PointDouble p) {
 		return new PointDouble(getDisplayX(p.x), getDisplayY(p.y));
-	}
-	
-	
-	private Complex expi(Complex c) {
-		return ComplexMath.exp(Complex.I.multiply(c.multiply(Math.PI / 2)));
-	}
-	
-	public PointDouble getPointFromComplex(Complex c) {
-		return new PointDouble(c.real, c.imaginary);
 	}
 	
 	

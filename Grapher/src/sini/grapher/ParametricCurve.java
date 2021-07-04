@@ -14,16 +14,24 @@ public class ParametricCurve implements Curve {
 	
 	private Color color;
 	private Function<double[], double[]> f;
-	private Display display;
 	private ArrayList<double[][]> mesh;
 	
-	public ParametricCurve(Display display, Function<double[], double[]> f) {
-		this(display, f, new Color(60, 100, 255));
+	public ParametricCurve(Function<double[], double[]> f) {
+		this(f, new Color(60, 100, 255));
 	}
 	
-	public ParametricCurve(Display display, Function<double[], double[]> f, Color color) {
+	public ParametricCurve(Function<double[], double[]> f, Interval interval, double step) {
+		this(f);
+		updateMesh(interval, step);
+	}
+	
+	public ParametricCurve(Function<double[], double[]> f, Interval interval, double step, Color color) {
+		this(f, color);
+		updateMesh(interval, step);
+	}
+	
+	public ParametricCurve(Function<double[], double[]> f, Color color) {
 		this.color = color;
-		this.display = display;
 		this.f = f;
 		mesh = new ArrayList<double[][]>();
 	}
@@ -47,17 +55,17 @@ public class ParametricCurve implements Curve {
 		}
 	}
 	
-	public void draw(Graphics2D g) {
+	public void draw(Display display, Graphics2D g) {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(color);
 		g.setStroke(new BasicStroke(3, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 		
 		for(double[][] meshSegment: mesh) {
-			fillPolytope(g, meshSegment);
+			fillPolytope(display, g, meshSegment);
 		}
 	}
 
-	private void fillPolytope(Graphics2D g, double[][] meshSegment) {
+	private void fillPolytope(Display display, Graphics2D g, double[][] meshSegment) {
 		switch(intLog(meshSegment.length)) {
 		case 1: // 1-dimensional interval - draw a line
 			// we are assuming the points on the mesh are 2 dimensional for now
