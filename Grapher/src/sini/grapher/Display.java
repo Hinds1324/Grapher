@@ -11,7 +11,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 	private static final long serialVersionUID = -6696561578530033238L;
 	
 	private static final int GRID_CELL_DISPLAY_SIZE = 50;
-	public static final double GRID_SCALE_FACTOR = 5;
+	public static final double GRID_SCALE_FACTOR = 10;
 	
 	private PointDouble viewPoint = new PointDouble(); // Represents the top left coordinate of the viewport
 	private double zoom;
@@ -92,8 +92,8 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		
 		Graphics2D g2 = (Graphics2D) g;
 		
-		double yAxisDisplayPos = Math.max(0, Math.min(getWidth(), getDisplayX(0)));
-		double xAxisDisplayPos = Math.max(0, Math.min(getWidth(), getDisplayY(0)));
+		int yAxisDisplayPos = (int)Math.max(0, Math.min(getWidth(), getDisplayX(0)));
+		int xAxisDisplayPos = (int)Math.max(0, Math.min(getWidth(), getDisplayY(0)));
 		
 		
 		// Draw minor grid lines
@@ -118,8 +118,8 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		// Draw axis lines
 		
 		g2.setColor(Color.BLACK);
-		g2.drawLine((int)yAxisDisplayPos, 0, (int)yAxisDisplayPos, getHeight());
-		g2.drawLine(0, (int)xAxisDisplayPos, getWidth(), (int)xAxisDisplayPos);
+		g2.drawLine(yAxisDisplayPos, 0, yAxisDisplayPos, getHeight());
+		g2.drawLine(0, xAxisDisplayPos, getWidth(), xAxisDisplayPos);
 		
 		
 		// Draw graph
@@ -127,6 +127,28 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		for(Curve curve: curves) {
 			curve.draw(this, g2);
 		}
+		
+		
+		// Number the axes
+		g2.setColor(Color.BLACK);
+		doGrid(
+				x -> { 
+					if(x.intValue() != (int)getDisplayX(0)) { 
+						g2.drawString(
+								String.format("%." + (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR))) + "f", getPlaneX(x)), 
+								x.intValue(), 
+								xAxisDisplayPos - 2);
+						}
+					},	
+				
+				y -> {
+					if(y.intValue() != (int)getDisplayY(0)) { 
+						g2.drawString(
+							String.format("%." + (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR))) + "f", getPlaneY(y)), 
+							yAxisDisplayPos + 2, 
+							y.intValue());
+						}
+					});
 	}
 	
 	public double getGridScale() {
