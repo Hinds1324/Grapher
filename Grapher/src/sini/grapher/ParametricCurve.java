@@ -50,11 +50,19 @@ public class ParametricCurve implements Curve {
 		
 		while(iter.hasNext()) {
 			double[][] currentMeshSeg = iter.next();
+			
+			// If 2 dimensional segment, swap the last two points so that we have a simple polygon (this fix is temporary and should be generalised to higher dimensions)
+			if(currentMeshSeg.length == 4) {
+				double[] temp = currentMeshSeg[2];
+				currentMeshSeg[2] = currentMeshSeg[3];
+				currentMeshSeg[3] = temp;
+			}
+			
 			for(int i = 0; i < currentMeshSeg.length; i++) currentMeshSeg[i] = f.apply(currentMeshSeg[i]);
 			mesh.add(currentMeshSeg);
 		}
 	}
-	
+
 	public void draw(Display display, Graphics2D g) {
 		g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 		g.setColor(color);
@@ -79,6 +87,7 @@ public class ParametricCurve implements Curve {
 			for(int i=0; i < meshSegment.length; i++) {
 				p.addPoint((int)display.getDisplayX(meshSegment[i][0]), (int)display.getDisplayY(meshSegment[i][1]));
 			}
+			
 			g.fill(p);
 		}
 	}

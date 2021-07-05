@@ -113,20 +113,21 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 				x -> g2.drawLine(x.intValue(), 0, x.intValue(), getHeight()),
 				y -> g2.drawLine(0, y.intValue(), getWidth(), y.intValue())
 				);
-		
-		
-		// Draw axis lines
-		
-		g2.setColor(Color.BLACK);
-		g2.drawLine(yAxisDisplayPos, 0, yAxisDisplayPos, getHeight());
-		g2.drawLine(0, xAxisDisplayPos, getWidth(), xAxisDisplayPos);
-		
+
 		
 		// Draw graph
 		
 		for(Curve curve: curves) {
 			curve.draw(this, g2);
 		}
+		
+		
+		// Draw axis lines
+		
+		g2.setStroke(new BasicStroke(1));
+		g2.setColor(Color.BLACK);
+		g2.drawLine(yAxisDisplayPos, 0, yAxisDisplayPos, getHeight());
+		g2.drawLine(0, xAxisDisplayPos, getWidth(), xAxisDisplayPos);
 		
 		
 		// Number the axes
