@@ -3,6 +3,7 @@ package sini.grapher;
 import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.function.Function;
 
 import sini.complex.Complex;
 import sini.complex.ComplexMath;
@@ -18,10 +19,11 @@ public class CurveList {
 	public static ArrayList<Curve> getCurves() {
 		ArrayList<Curve> curves = new ArrayList<Curve>();
 		
-		//curves.add(new ParametricCurve(p -> tetrationCardoid(p), new Interval(0, 4), 0.01));
+		//curves.add(new ParametricCurve(p -> tetrationCardioid(p), new Interval(0, 4), 0.01));
 		//curves.add(new SimpleFunctionCurve(x -> Math.sin(x), randomColor()));
 		//curves.add(new SimpleFunctionCurve(x -> x*x, randomColor()));
 		curves.add(new SimpleFunctionCurve(x -> funnyFractionFractal(x), randomColor()));
+		curves.add(new ParametricCurve(x -> x, Interval.product(new Interval(1, 2), new Interval(3, 5)), 0.1));
 		
 		return curves;
 	}
@@ -38,7 +40,7 @@ public class CurveList {
 		return result;
 	}
 
-	private static double[] tetrationCardoid(double[] p) {
+	private static double[] tetrationCardioid(double[] p) {
 		Complex c = new Complex(p[0], 0);
 		c = expi(expi(c));
 		return new double[] {c.real, c.imaginary};

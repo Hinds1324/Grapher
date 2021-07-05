@@ -1,6 +1,7 @@
 package sini.grapher;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
 
 public class Frame extends JFrame {
 	private static final long serialVersionUID = 3395687923968706523L;
@@ -14,7 +15,8 @@ public class Frame extends JFrame {
 		Display d = new Display();
 		add(d);
 		
+		
 		setVisible(true);
-		d.centerViewpoint(new PointDouble(2, 0));
+		SwingUtilities.invokeLater(() -> d.centerViewport(new PointDouble(2, 0)));
 	}
 }

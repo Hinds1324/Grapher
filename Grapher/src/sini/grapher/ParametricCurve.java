@@ -69,8 +69,8 @@ public class ParametricCurve implements Curve {
 		switch(intLog(meshSegment.length)) {
 		case 1: // 1-dimensional interval - draw a line
 			// we are assuming the points on the mesh are 2 dimensional for now
-			PointDouble p1 = display.getDisplayCoord(new PointDouble(meshSegment[0][0], meshSegment[0][1]));
-			PointDouble p2 = display.getDisplayCoord(new PointDouble(meshSegment[1][0], meshSegment[1][1]));;
+			PointDouble p1 = display.getDisplayPoint(new PointDouble(meshSegment[0][0], meshSegment[0][1]));
+			PointDouble p2 = display.getDisplayPoint(new PointDouble(meshSegment[1][0], meshSegment[1][1]));;
 			g.draw(new Line2D.Double(p1.x, p1.y, p2.x, p2.y));
 			
 		case 2: // 2-dimensional interval - draw a polygon
