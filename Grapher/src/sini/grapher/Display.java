@@ -17,9 +17,12 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 	private double zoom;
 	
 	ArrayList<Curve> curves;
+	
+	Theme theme;
 
 	public Display() {
 		zoom = 2;
+		
 		setBackground(Color.WHITE);
 		
 		addMouseListener(this);
@@ -27,6 +30,33 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		addMouseMotionListener(this);
 		
 		curves = CurveList.getCurves();
+		
+		defineThemes();
+	}
+	
+	private void defineThemes() {
+		Theme themeLight = new Theme();
+		themeLight.setColor(Theme.BACKGROUND, Color.WHITE);
+		themeLight.setColor(Theme.AXES, Color.BLACK);
+		themeLight.setColor(Theme.MAJOR_TICKS, Color.LIGHT_GRAY);
+		themeLight.setColor(Theme.MINOR_TICKS, new Color(230, 230, 230));
+		themeLight.setColor(Theme.CURVE_DEFAULT, new Color(60, 100, 255));
+		
+		Theme themeDark = new Theme();
+		themeDark.setColor(Theme.BACKGROUND, new Color(20, 20, 20));
+		themeDark.setColor(Theme.AXES, new Color(200, 200, 200));
+		themeDark.setColor(Theme.MAJOR_TICKS, new Color(80, 80, 80));
+		themeDark.setColor(Theme.MINOR_TICKS, new Color(40, 40, 40));
+		themeDark.setColor(Theme.CURVE_DEFAULT, new Color(60, 100, 255));
+		
+		Theme themeBlueprint = new Theme();
+		themeBlueprint.setColor(Theme.BACKGROUND, new Color(110, 140, 255));
+		themeBlueprint.setColor(Theme.AXES, new Color(200, 230, 255));
+		themeBlueprint.setColor(Theme.MAJOR_TICKS, new Color(170, 200, 255));
+		themeBlueprint.setColor(Theme.MINOR_TICKS, new Color(130, 160, 255));
+		themeBlueprint.setColor(Theme.CURVE_DEFAULT, Color.WHITE);
+		
+		theme = themeBlueprint;
 	}
 	
 	private void updateCurves() {
@@ -88,17 +118,18 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 	}
 	
 	public void paintComponent(Graphics g) {
+		setBackground(theme.getColor(Theme.BACKGROUND));
 		super.paintComponent(g);
 		
 		Graphics2D g2 = (Graphics2D) g;
 		
-		int yAxisDisplayPos = (int)Math.max(0, Math.min(getWidth(), getDisplayX(0)));
-		int xAxisDisplayPos = (int)Math.max(0, Math.min(getWidth(), getDisplayY(0)));
+		int yAxisDisplayPos = (int)getDisplayX(0);
+		int xAxisDisplayPos = (int)getDisplayY(0);
 		
 		
 		// Draw minor grid lines
 		
-		g2.setColor(new Color(230, 230, 230));
+		g2.setColor(theme.getColor(Theme.MINOR_TICKS));
 		doGrid(
 				x -> g2.drawLine(x.intValue(), 0, x.intValue(), getHeight()),
 				y -> g2.drawLine(0, y.intValue(), getWidth(), y.intValue()),
@@ -108,7 +139,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		
 		// Draw major grid lines
 		
-		g2.setColor(Color.LIGHT_GRAY);
+		g2.setColor(theme.getColor(Theme.MAJOR_TICKS));
 		doGrid(
 				x -> g2.drawLine(x.intValue(), 0, x.intValue(), getHeight()),
 				y -> g2.drawLine(0, y.intValue(), getWidth(), y.intValue())
@@ -125,31 +156,64 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		// Draw axis lines
 		
 		g2.setStroke(new BasicStroke(1));
-		g2.setColor(Color.BLACK);
+		g2.setColor(theme.getColor(Theme.AXES));
 		g2.drawLine(yAxisDisplayPos, 0, yAxisDisplayPos, getHeight());
 		g2.drawLine(0, xAxisDisplayPos, getWidth(), xAxisDisplayPos);
 		
 		
 		// Number the axes
-		g2.setColor(Color.BLACK);
-		doGrid(
-				x -> { 
-					if(x.intValue() != (int)getDisplayX(0)) { 
-						g2.drawString(
-								String.format("%." + (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR))) + "f", getPlaneX(x)), 
-								x.intValue(), 
-								xAxisDisplayPos - 2);
-						}
-					},	
-				
-				y -> {
-					if(y.intValue() != (int)getDisplayY(0)) { 
-						g2.drawString(
-							String.format("%." + (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR))) + "f", getPlaneY(y)), 
-							yAxisDisplayPos + 2, 
-							y.intValue());
-						}
-					});
+		g2.setColor(theme.getColor(Theme.AXES));
+		doGrid(x -> drawXAxisNumber(g2, x.intValue()), y -> drawYAxisNumber(g2, y.intValue()));
+	}
+	
+	private void drawYAxisNumber(Graphics2D g, int y) {
+		int yAxisDisplayPos = (int)getDisplayX(0);
+		int numberLength = (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR)));
+		int stringPadding = 5;
+		
+		String numberString = String.format("%." + numberLength + "f", getPlaneY(y));
+		int stringWidth = g.getFontMetrics().stringWidth(numberString);
+		int numberXPos;
+		
+		if(yAxisDisplayPos > getWidth() - stringWidth - stringPadding) {
+			numberXPos = getWidth() - stringWidth - stringPadding;
+		} else if (yAxisDisplayPos < 0) {
+			numberXPos = stringPadding;
+		} else {
+			numberXPos = yAxisDisplayPos + stringPadding;
+		}
+		
+		if(y != (int)getDisplayY(0)) { 
+			g.drawString(
+				numberString, 
+				numberXPos, 
+				y);
+		}
+	}
+	
+	private void drawXAxisNumber(Graphics2D g, int x) {
+		int xAxisDisplayPos = (int)getDisplayY(0);
+		int numberLength = (int)Math.max(0, Math.floor(Math.log(zoom) / Math.log(GRID_SCALE_FACTOR)));
+		int stringPadding = 5;
+		
+		String numberString = String.format("%." + numberLength + "f", getPlaneX(x));
+		int stringHeight = g.getFontMetrics().getHeight();
+		int numberYPos;
+		
+		if(xAxisDisplayPos > getHeight() - stringPadding) {
+			numberYPos = getHeight() - stringPadding;
+		} else if (xAxisDisplayPos < stringHeight + 2*stringPadding) {
+			numberYPos = stringHeight + stringPadding;
+		} else {
+			numberYPos = xAxisDisplayPos - stringPadding;
+		}
+		
+		if(x != (int)getDisplayX(0)) { 
+			g.drawString(
+				numberString, 
+				x,
+				numberYPos);
+		}
 	}
 	
 	public double getGridScale() {

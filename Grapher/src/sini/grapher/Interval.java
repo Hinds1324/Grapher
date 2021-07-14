@@ -405,7 +405,6 @@ public class Interval implements Cloneable {
 	private class IntervalPointIterator implements Iterator<double[]> {
 		
 		private int index;
-		private int maxIndex;
 		private double step;
 		
 		private double[] currentPoint;
@@ -415,17 +414,18 @@ public class Interval implements Cloneable {
 			
 			index = -1;
 			this.step = step;
-			
-			maxIndex = 1;
-			Iterator<Interval> iter = Interval.this.getFactorIterator();
-			while(iter.hasNext()) {
-				Interval currentFactor = iter.next();
-				maxIndex *= Math.floor((double)currentFactor.length() / step) + 1;
-			}
 		}
 		
 		public boolean hasNext() {
-			return index < maxIndex - 1;
+			if(currentPoint == null) return true;
+			
+			Iterator<Interval> iter = Interval.this.getFactorIterator();
+			for(int i = 0; i < currentPoint.length; i++) {
+				Interval currentFactor = iter.next();
+				if(currentPoint[i] + step <= currentFactor.upper()) return true;
+			}
+			
+			return false;
 		}
 		
 		public double[] next() {

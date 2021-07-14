@@ -17,7 +17,7 @@ public class ParametricCurve implements Curve {
 	private ArrayList<double[][]> mesh;
 	
 	public ParametricCurve(Function<double[], double[]> f) {
-		this(f, new Color(60, 100, 255));
+		this(f, Color.WHITE);
 	}
 	
 	public ParametricCurve(Function<double[], double[]> f, Interval interval, double step) {
@@ -88,7 +88,7 @@ public class ParametricCurve implements Curve {
 				p.addPoint((int)display.getDisplayX(meshSegment[i][0]), (int)display.getDisplayY(meshSegment[i][1]));
 			}
 			
-			g.fill(p);
+			g.draw(p);
 		}
 	}
 	
