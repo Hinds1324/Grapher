@@ -35,7 +35,7 @@ public class CurveList {
 			float hue = (float)((t - interval.lower()) / interval.length());
 			Color color = Color.getHSBColor(hue, 1.0F, 1.0F);
 			
-			curves.add(deq.getSolutionCurve(interval2, t, 0, 0.2, 1000, color, 10));
+			curves.add(deq.getSolutionCurve(interval2, t, 0, 0.2, 1000, color, 8));
 		}
 		
 		//curves.add(deq.getSolutionCurve(interval2, 0, 0, 0.0001, 100000));
