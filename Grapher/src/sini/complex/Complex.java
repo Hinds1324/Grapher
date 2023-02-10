@@ -14,6 +14,10 @@ public class Complex {
 		this.imaginary = imaginary;
 	}
 	
+	public double arg() {
+		return Math.atan2(imaginary, real);
+	}
+	
 	public double magnitude() {
 		return Math.sqrt(real*real + imaginary*imaginary);
 	}
@@ -38,7 +42,31 @@ public class Complex {
 		return new Complex(real / (real*real - imaginary*imaginary), -imaginary / (real*real - imaginary*imaginary));
 	}
 	
+	public Complex negate() {
+		return new Complex(-real, -imaginary);
+	}
+	
+	public Complex conjugate() {
+		return new Complex(real, -imaginary);
+	}
+	
+	public static Complex real(double real) {
+		return new Complex(real, 0);
+	}
+	
+	public static Complex imaginary(double imaginary) {
+		return new Complex(0, imaginary);
+	}
+	
 	public String toString() {
-		return "(" + real + ", " + imaginary + ")";
+		return "(" + real + ", " + imaginary + "i)";
+	}
+	
+	public boolean equals(Object o) {
+		if(o instanceof Complex) {
+			Complex c = (Complex) o;
+			return (real == c.real) && (imaginary == c.imaginary);
+		}
+		return false;
 	}
 }

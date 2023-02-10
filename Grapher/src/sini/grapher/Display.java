@@ -56,7 +56,7 @@ public class Display extends JPanel implements MouseWheelListener, MouseMotionLi
 		themeBlueprint.setColor(Theme.MINOR_TICKS, new Color(130, 160, 255));
 		themeBlueprint.setColor(Theme.CURVE_DEFAULT, Color.WHITE);
 		
-		theme = themeBlueprint;
+		theme = themeLight;
 	}
 	
 	private void updateCurves() {

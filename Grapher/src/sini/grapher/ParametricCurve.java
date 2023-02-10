@@ -17,7 +17,7 @@ public class ParametricCurve implements Curve {
 	private ArrayList<double[][]> mesh;
 	
 	public ParametricCurve(Function<double[], double[]> f) {
-		this(f, Color.WHITE);
+		this(f, Color.RED);
 	}
 	
 	public ParametricCurve(Function<double[], double[]> f, Interval interval, double step) {

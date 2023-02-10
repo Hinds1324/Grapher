@@ -35,6 +35,10 @@ public class ComplexMath {
 		return multiply(result, pow(c, r));
 	}
 	
+	public static Complex pow(Complex c1, Complex c2) {
+		return exp(multiply(c2, log(c1)));
+	}
+	
 	public static Complex exp(Complex c) {
 		Complex result = Complex.ONE;
 		Complex currentTerm = Complex.ONE;
@@ -45,5 +49,12 @@ public class ComplexMath {
 		}
 		
 		return result;
+	}
+	
+	public static Complex log(Complex c) {
+		double real = Math.log(c.magnitude());
+		double imag = c.arg();
+		
+		return new Complex(real, imag);
 	}
 }
